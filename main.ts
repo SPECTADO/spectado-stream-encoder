@@ -1,5 +1,17 @@
-import logger from "./src/logger.ts";
-import { args } from "./src/args.ts";
+import logger from "/src/logger.ts";
+import { args } from "/src/args.ts";
+import { syncConfigToSession, SessionStatus } from "/src/sessionManager.ts";
+import { SessionManagerItem } from "/src/types/sessionManager.d.ts";
+import { Config } from "/src/types/config.d.ts";
+
+const VERSION = "0.1-beta";
+
+declare global {
+  // deno-lint-ignore no-var
+  var config: Config;
+  // deno-lint-ignore no-var
+  var streams: Array<SessionManagerItem>;
+}
 
 Deno.addSignalListener("SIGINT", () => {
   logger.log("SIGINT received - exiting...");
@@ -9,9 +21,28 @@ Deno.addSignalListener("SIGINT", () => {
 // Learn more at https://docs.deno.com/runtime/manual/examples/module_metadata#concepts
 if (import.meta.main) {
   logger.log("SPECTADO-STREAM_ENCODER is starting...");
+  logger.log(`Version: ${VERSION}`);
+  logger.log("--------------------------------------");
   logger.debug("args", args);
 
-  Deno.serve({ port: args.port ? parseInt(args.port) : 7080 }, (_req) => {
-    return new Response("Hello, World!");
-  });
+  // Read the file and parse the JSON content
+  const configDataFile = await Deno.readTextFile("./config.json");
+
+  // setup globals
+  globalThis.config = JSON.parse(configDataFile);
+  globalThis.streams = [] as SessionManagerItem[];
+
+  syncConfigToSession();
 }
+
+// main event loop
+setInterval(() => {
+  logger.statusLine(
+    globalThis.streams
+      .map(
+        (session: SessionManagerItem): string =>
+          `${session.id} ${session.status === SessionStatus.live ? "✅" : "❌"}`
+      )
+      .join(" | ")
+  );
+}, 2000);

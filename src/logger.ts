@@ -10,7 +10,8 @@ export const LOG_TYPES = {
   FFDEBUG: 5,
 };
 
-const logType = LOG_TYPES.WARNING;
+const logType =
+  process.env.NODE_ENV === "production" ? LOG_TYPES.WARNING : LOG_TYPES.DEBUG;
 
 const logTime = () => {
   const nowDate = new Date();
@@ -26,6 +27,13 @@ const log = (...args: any[]) => {
 const info = (...args: any[]) => {
   if (logType < LOG_TYPES.INFO) return;
   console.log(logTime(), process.pid, chalk.bold.blue("[INFO]"), ...args);
+};
+
+const statusLine = (...args: any[]) => {
+  if (logType < LOG_TYPES.INFO) return;
+  // Move cursor up one line and clear it
+  Deno.stdout.writeSync(new TextEncoder().encode("\x1b[1A\x1b[2K"));
+  console.log(chalk.bold.blue("→ "), ...args);
 };
 
 const warn = (...args: any[]) => {
@@ -55,6 +63,7 @@ const ffdebug = (...args: any[]) => {
 
 export default {
   log,
+  statusLine,
   info,
   warn,
   error,

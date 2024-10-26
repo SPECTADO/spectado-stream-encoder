@@ -30,3 +30,6 @@ out/
 .vscode/
 .idea/
 *.swp
+
+# Ignore local test files
+config.json
