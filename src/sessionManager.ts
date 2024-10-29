@@ -48,6 +48,7 @@ export const addNewStream = (encoder: EncoderConfig) => {
     status: SessionStatus.connecting,
     encoder: encoder,
   };
+
   globalThis.streams.push(session);
 };
 

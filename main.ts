@@ -11,6 +11,8 @@ declare global {
   var config: Config;
   // deno-lint-ignore no-var
   var streams: Array<SessionManagerItem>;
+  // deno-lint-ignore no-var
+  var wasLastLoggerLineStatus: boolean;
 }
 
 Deno.addSignalListener("SIGINT", () => {
@@ -31,7 +33,6 @@ if (import.meta.main) {
   // setup globals
   globalThis.config = JSON.parse(configDataFile);
   globalThis.streams = [] as SessionManagerItem[];
-
   syncConfigToSession();
 }
 
@@ -45,4 +46,4 @@ setInterval(() => {
       )
       .join(" | ")
   );
-}, 2000);
+}, 1000);
