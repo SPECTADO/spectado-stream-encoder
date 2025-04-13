@@ -24,7 +24,10 @@ export const creatFfmpegConfig = (encoderConfig: EncoderConfig) => {
   const icecastConfig: IcecastConfig = encoderConfig.icecast;
   const argv: string[] = [];
 
-  if (supportedFormats.includes(encoderConfig.format) === false) {
+  if (
+    !encoderConfig.format ||
+    supportedFormats.includes(encoderConfig.format) === false
+  ) {
     throw new Error(
       `Invalid encoder format "${
         encoderConfig.format
