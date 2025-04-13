@@ -107,7 +107,7 @@ export const startAndWatchEncoderThread = async (
   logger.debug(
     `Created ffmpeg process with id ${ffmpeg_exec.pid} | ${
       globalThis.config.ffmpegBinaryPath
-    } ${argv.join(" ")}`
+    } ${argv ? argv.join(" ") : "---"}`
   );
 
   updateSessionStatus(session.id, SessionStatus.live);
