@@ -1,9 +1,12 @@
+import { startAndWatchEncoderThread } from "/src/ffmpegManager.ts";
 import { EncoderConfig } from "/src/types/config.d.ts";
 import { SessionManagerItem } from "/src/types/sessionManager.d.ts";
+import logger from "/src/logger.ts";
 
 export enum SessionStatus {
   live,
   connecting,
+  error,
   stopped,
 }
 
@@ -36,20 +39,47 @@ export const syncConfigToSession = () => {
   });
 };
 
+export const checkSessionsStatus = () => {
+  const streamsToStart = findStreamOffline();
+
+  if (streamsToStart) {
+    logger.debug("[Session Manager] Starting a new encoder", streamsToStart.id);
+
+    updateSessionStatus(streamsToStart.id, SessionStatus.connecting);
+    startAndWatchEncoderThread(streamsToStart);
+  }
+};
+
 export const findStream = (id: string) => {
   return globalThis.streams.find(
     (session: SessionManagerItem) => session.id === id
   );
 };
 
+export const findStreamOffline = (): SessionManagerItem | undefined => {
+  return globalThis.streams.find(
+    (session: SessionManagerItem) => session.status === SessionStatus.stopped
+  );
+};
+
 export const addNewStream = (encoder: EncoderConfig) => {
   const session: SessionManagerItem = {
     id: encoder.id,
-    status: SessionStatus.connecting,
+    status: SessionStatus.stopped,
     encoder: encoder,
   };
 
   globalThis.streams.push(session);
+};
+
+export const updateSessionStatus = (id: string, status: SessionStatus) => {
+  globalThis.streams = globalThis.streams.map((session) => {
+    if (session.id === id) {
+      return { ...session, status: status };
+    }
+
+    return session;
+  });
 };
 
 export const removeStream = (id: string) => {};

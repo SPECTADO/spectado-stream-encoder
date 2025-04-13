@@ -3,7 +3,7 @@
     "dev": "deno run --allow-read --allow-write --allow-net --allow-run --allow-env --watch main.ts",
 
     "dist": "deno task compile && deno task ffmpeg",
-    "compile": "deno task compile-win && deno task compile-darwin && deno task compile-darwin-intel && deno task compile-linux && deno task compile-linux-arm",
+    "build": "deno task compile-win && deno task compile-darwin && deno task compile-darwin-intel && deno task compile-linux && deno task compile-linux-arm",
     "compile-win": "deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --target x86_64-pc-windows-msvc  --output ./dist/win/spectado-stream-encoder.exe main.ts",
     "compile-darwin": "deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --target aarch64-apple-darwin  --output ./dist/macos/spectado-stream-encoder_arm main.ts",
     "compile-darwin-intel": "deno compile --allow-read --allow-write --allow-net --allow-run --allow-env --target x86_64-apple-darwin  --output ./dist/macos/spectado-stream-encoder_x86 main.ts",

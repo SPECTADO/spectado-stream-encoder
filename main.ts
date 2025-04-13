@@ -1,10 +1,16 @@
 import logger from "/src/logger.ts";
 import { args } from "/src/args.ts";
-import { syncConfigToSession, SessionStatus } from "/src/sessionManager.ts";
+import {
+  syncConfigToSession,
+  SessionStatus,
+  checkSessionsStatus,
+} from "/src/sessionManager.ts";
 import { SessionManagerItem } from "/src/types/sessionManager.d.ts";
 import { Config } from "/src/types/config.d.ts";
 
-const VERSION = "0.1-beta";
+const VERSION = "1.0 beta";
+const STATUS_CHECK_INT = 5000;
+const CONFIG_RELOAD_INT = 30000;
 
 declare global {
   // deno-lint-ignore no-var
@@ -22,7 +28,7 @@ Deno.addSignalListener("SIGINT", () => {
 
 // Learn more at https://docs.deno.com/runtime/manual/examples/module_metadata#concepts
 if (import.meta.main) {
-  logger.log("SPECTADO-STREAM_ENCODER is starting...");
+  logger.log("SPECTADO-STREAM-ENCODER is starting...");
   logger.log(`Version: ${VERSION}`);
   logger.log("--------------------------------------");
   logger.debug("args", args);
@@ -34,7 +40,18 @@ if (import.meta.main) {
   globalThis.config = JSON.parse(configDataFile);
   globalThis.streams = [] as SessionManagerItem[];
   syncConfigToSession();
+  checkSessionsStatus();
 }
+
+// re-sync settings
+setInterval(() => {
+  syncConfigToSession();
+}, CONFIG_RELOAD_INT);
+
+// check status and connect streams...
+setInterval(() => {
+  checkSessionsStatus();
+}, STATUS_CHECK_INT);
 
 // main event loop
 setInterval(() => {
@@ -42,7 +59,13 @@ setInterval(() => {
     globalThis.streams
       .map(
         (session: SessionManagerItem): string =>
-          `${session.id} ${session.status === SessionStatus.live ? "✅" : "❌"}`
+          `${session.id} ${session.status} ${
+            session.status === SessionStatus.live
+              ? "✅"
+              : session.status === SessionStatus.stopped
+              ? "❌"
+              : "⚠️"
+          }`
       )
       .join(" | ")
   );
