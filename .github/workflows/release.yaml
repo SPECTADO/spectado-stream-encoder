@@ -26,10 +26,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/linux/spectado-stream-encoder_arm
-            dist/linux/spectado-stream-encoder_x86
-            dist/macos/spectado-stream-encoder_arm
-            dist/macos/spectado-stream-encoder_x86
+            dist/linux/spectado-stream-encoder_gnu-arm
+            dist/linux/spectado-stream-encoder_gnu-x86
+            dist/macos/spectado-stream-encoder_darwin-apple
+            dist/macos/spectado-stream-encoder_darwin-intel
             dist/win/spectado-stream-encoder.exe
             README.md
         env:
