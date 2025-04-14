@@ -1,5 +1,11 @@
 # Audio Encoder for ICECAST server
 
+Simple cross-platform, command-line based audio encoder for icecast streams.
+
+## This project is sponsored by PLAY.CZ
+
+<img src="https://www.play.cz/wp-content/uploads/2025/04/playcz_logo_hires.png" alt="PLAY.CZ Logo" width="200px">
+
 ## supported OS:
 
 - MacOS (intel / apple silicone)
