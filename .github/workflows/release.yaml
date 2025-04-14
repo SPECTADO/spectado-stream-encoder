@@ -1,0 +1,36 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - "v*" # Triggers on version tags like v1.0.0
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x # or a specific version like v1.43.0
+
+      - name: Compile Deno app
+        run: |
+          deno task build
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/linux/spectado-stream-encoder_arm
+            dist/linux/spectado-stream-encoder_x86
+            dist/macos/spectado-stream-encoder_arm
+            dist/macos/spectado-stream-encoder_x86
+            dist/win/spectado-stream-encoder.exe
+            README.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
