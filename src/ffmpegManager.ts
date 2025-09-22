@@ -36,12 +36,17 @@ export const creatFfmpegConfig = (encoderConfig: EncoderConfig) => {
     return;
   }
 
+  let captureAudioCard = encoderConfig.captureAudioCard;
+  // Windows (dshow) device name needs the audio= prefix and quoting
+  if (Deno.build.os === "windows")
+    captureAudioCard = `audio="${encoderConfig.captureAudioCard}"`;
+
   argv.push("-loglevel");
   argv.push("info");
   argv.push("-f");
   argv.push(globalThis.config.ffmpegCaptureMode);
   argv.push("-i");
-  argv.push(encoderConfig.captureAudioCard);
+  argv.push(captureAudioCard);
 
   if (encoderConfig.format === "aac") {
     argv.push("-acodec");
@@ -85,7 +90,7 @@ export const creatFfmpegConfig = (encoderConfig: EncoderConfig) => {
     }@${icecastConfig.server}/${icecastConfig.mount}`
   );
 
-  // logger.debug("[FFMPEG] create config", { encoderConfig, argv });
+  logger.debug("[FFMPEG] create config", { encoderConfig, argv });
   return argv;
 };
 

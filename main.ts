@@ -8,7 +8,7 @@ import {
 import { SessionManagerItem } from "/src/types/sessionManager.d.ts";
 import { Config } from "/src/types/config.d.ts";
 
-const VERSION = "1.0 beta";
+const VERSION = "1.0 beta 5";
 const STATUS_CHECK_INT = 5000;
 const CONFIG_RELOAD_INT = 30000;
 
@@ -30,6 +30,7 @@ Deno.addSignalListener("SIGINT", () => {
 if (import.meta.main) {
   logger.log("SPECTADO-STREAM-ENCODER is starting...");
   logger.log(`Version: ${VERSION}`);
+  logger.log("Platform:", Deno.build.os);
   logger.log("--------------------------------------");
   logger.debug("args", args);
 

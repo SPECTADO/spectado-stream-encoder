@@ -47,18 +47,18 @@ Create config.json in same directory as executable
 
 ### Encoder settings
 
-| property          | type           | description                                                                                      | example                                                                                             |
-| ----------------- | -------------- | ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| id                | string         | Inique ID                                                                                        | test-stream                                                                                         |
-| bitrate           | int            | Bitrate in kb                                                                                    | 128                                                                                                 |
-| channels          | int            | Number of audio channels (1 = mono / 2 = stereo )                                                | 2                                                                                                   |
-| samplerate        | int            | Audio sample rate in Hz                                                                          | 44100                                                                                               |
-| format            | mp3, aac, aac+ | Audio format. Please note, that aac+ requires custom ffmpeg build with libfdk_aac build into it. | mp3                                                                                                 |
-| captureAudioCard  | string         | Audio cart ID for ffmpeg <br/> \* see later in this docs                                         | `":0"` for MacOS <br/> `"audio=\"Your Audio Device Name\""` for Windows <br/> `"default"` for Linux |
-| icecast->mount    | string         | Icecast mountpoint name                                                                          | test.mp3                                                                                            |
-| icecast->username | string         | Username for this mountpoint (if you do not know, the `source` is default)                       | source                                                                                              |
-| icecast->password | string         | Password for this mountpoint                                                                     | password                                                                                            |
-| icecast->server   | string         | Icecast server with optional port                                                                | icecast-server.example.com:8080                                                                     |
+| property          | type           | description                                                                                      | example                                                                                   |
+| ----------------- | -------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| id                | string         | Inique ID                                                                                        | test-stream                                                                               |
+| bitrate           | int            | Bitrate in kb                                                                                    | 128                                                                                       |
+| channels          | int            | Number of audio channels (1 = mono / 2 = stereo )                                                | 2                                                                                         |
+| samplerate        | int            | Audio sample rate in Hz                                                                          | 44100                                                                                     |
+| format            | mp3, aac, aac+ | Audio format. Please note, that aac+ requires custom ffmpeg build with libfdk_aac build into it. | mp3                                                                                       |
+| captureAudioCard  | string         | Audio cart ID for ffmpeg <br/> \* see later in this docs                                         | `":0"` for MacOS <br/> `"Your Audio Device Name"` for Windows <br/> `"default"` for Linux |
+| icecast->mount    | string         | Icecast mountpoint name                                                                          | test.mp3                                                                                  |
+| icecast->username | string         | Username for this mountpoint (if you do not know, the `source` is default)                       | source                                                                                    |
+| icecast->password | string         | Password for this mountpoint                                                                     | password                                                                                  |
+| icecast->server   | string         | Icecast server with optional port                                                                | icecast-server.example.com:8080                                                           |
 
 ## captureAudioCard & ffmpegCaptureMode
 

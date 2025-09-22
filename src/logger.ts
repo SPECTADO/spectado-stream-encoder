@@ -12,8 +12,8 @@ export const LOG_TYPES = {
   FFDEBUG: 5,
 };
 
-const logType =
-  process.env.NODE_ENV === "production" ? LOG_TYPES.WARNING : LOG_TYPES.DEBUG;
+const logType = LOG_TYPES.WARNING;
+// const logType = LOG_TYPES.DEBUG;
 
 const logTime = () => {
   return dayjs().format("HH:mm:ss");
@@ -43,7 +43,6 @@ const info = (...args: any[]) => {
 };
 
 const statusLine = (...args: any[]) => {
-  if (logType < LOG_TYPES.INFO) return;
   clearStatusLine();
   console.log(logTime(), process.pid, chalk.bold.green("→"), ...args);
   globalThis.wasLastLoggerLineStatus = true;
