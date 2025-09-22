@@ -110,7 +110,7 @@ Last step is to configure the audio input
 On Windows, you have to use the device name and set it using audio="" syntax.
 
 ```
-"audio=\"Your Audio Device Name\""
+"Your Audio Device Name"
 ```
 
 **MacOS**
