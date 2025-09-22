@@ -34,7 +34,7 @@ Create config.json in same directory as executable
         "password": "password",
         "server": "icecast.play.cz:8000"
       }
-    },
+    }
   ]
 }
 ```
