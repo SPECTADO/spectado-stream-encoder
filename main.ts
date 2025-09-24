@@ -82,7 +82,7 @@ setInterval(() => {
           s.status === SessionStatus.connecting
       ).length
     } | ${globalThis.streams
-      .filter((s) => s.status !== SessionStatus.live)
+      .filter((s) => s.status === SessionStatus.error)
       .map((item) => item.id)
       .join(", ")}`
   );
