@@ -19,5 +19,6 @@ export interface EncoderConfig {
 export interface Config {
   ffmpegBinaryPath: string;
   ffmpegCaptureMode: "avfoundation" | "alsa" | "dshow";
+  webui?: number;
   encoders: EncoderConfig[];
 }

@@ -7,6 +7,7 @@ import {
 } from "/src/sessionManager.ts";
 import { SessionManagerItem } from "/src/types/sessionManager.d.ts";
 import { Config } from "/src/types/config.d.ts";
+import { startWebServer, stopWebServer } from "/src/webServer.ts";
 
 const VERSION = "1.0 beta 6";
 const STATUS_CHECK_INT = 1000;
@@ -22,7 +23,9 @@ declare global {
 }
 
 Deno.addSignalListener("SIGINT", () => {
-  logger.log("SIGINT received - exiting...");
+  logger.log("SIGINT received - stopping services...");
+  stopWebServer();
+  logger.log("Exiting...");
   Deno.exit();
 });
 
@@ -49,6 +52,10 @@ async function reloadConfig() {
   globalThis.config = JSON.parse(configDataFile);
 
   syncConfigToSession();
+
+  // Start web server with configured port or default to 8080
+  const webPort = globalThis.config.webui || 8080;
+  startWebServer(webPort);
 }
 
 // re-sync settings
@@ -79,19 +86,4 @@ setInterval(() => {
       .map((item) => item.id)
       .join(", ")}`
   );
-
-  // logger.statusLine(
-  //   globalThis.streams
-  //     .map(
-  //       (session: SessionManagerItem): string =>
-  //         `${session.id} ${session.status} ${
-  //           session.status === SessionStatus.live
-  //             ? "✅"
-  //             : session.status === SessionStatus.stopped
-  //             ? "❌"
-  //             : "⚠️"
-  //         }`
-  //     )
-  //     .join(" | ")
-  // );
 }, 1000);
