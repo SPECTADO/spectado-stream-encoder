@@ -8,7 +8,7 @@ import {
 import { SessionManagerItem } from "/src/types/sessionManager.d.ts";
 import { Config } from "/src/types/config.d.ts";
 
-const VERSION = "1.0 beta 5";
+const VERSION = "1.0 beta 6";
 const STATUS_CHECK_INT = 5000;
 const CONFIG_RELOAD_INT = 30000;
 
