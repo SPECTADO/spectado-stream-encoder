@@ -75,19 +75,19 @@ Then, you need to list your available capture devices using ffmpeg to find ID or
 **Windows**
 
 ```
-ffmpeg.exe -f dshow -list_devices true -i dummy
+ffmpeg.exe -f dshow -list_devices true -i ""
 ```
 
 **MacOS**
 
 ```
-ffmpeg -f avfoundation -list_devices true -i dummy
+ffmpeg -f avfoundation -list_devices true -i ""
 ```
 
 **Linux**
 
 ```
-ffmpeg -f alsa -list_devices true -i dummy
+ffmpeg -f alsa -list_devices true -i ""
 ```
 
 Example output:
