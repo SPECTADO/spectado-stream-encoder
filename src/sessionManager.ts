@@ -82,4 +82,4 @@ export const updateSessionStatus = (id: string, status: SessionStatus) => {
   });
 };
 
-export const removeStream = (id: string) => {};
+export const removeStream = (id: string) => {}; // TODO: implement stream removal

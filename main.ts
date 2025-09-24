@@ -9,7 +9,7 @@ import { SessionManagerItem } from "/src/types/sessionManager.d.ts";
 import { Config } from "/src/types/config.d.ts";
 
 const VERSION = "1.0 beta 6";
-const STATUS_CHECK_INT = 5000;
+const STATUS_CHECK_INT = 1000;
 const CONFIG_RELOAD_INT = 30000;
 
 declare global {
@@ -34,19 +34,26 @@ if (import.meta.main) {
   logger.log("--------------------------------------");
   logger.debug("args", args);
 
+  globalThis.streams = [] as SessionManagerItem[];
+
+  //syncConfigToSession();
+  reloadConfig();
+  checkSessionsStatus();
+}
+
+async function reloadConfig() {
   // Read the file and parse the JSON content
   const configDataFile = await Deno.readTextFile("./config.json");
 
   // setup globals
   globalThis.config = JSON.parse(configDataFile);
-  globalThis.streams = [] as SessionManagerItem[];
+
   syncConfigToSession();
-  checkSessionsStatus();
 }
 
 // re-sync settings
 setInterval(() => {
-  syncConfigToSession();
+  reloadConfig();
 }, CONFIG_RELOAD_INT);
 
 // check status and connect streams...
@@ -57,17 +64,34 @@ setInterval(() => {
 // main event loop
 setInterval(() => {
   logger.statusLine(
-    globalThis.streams
-      .map(
-        (session: SessionManagerItem): string =>
-          `${session.id} ${session.status} ${
-            session.status === SessionStatus.live
-              ? "✅"
-              : session.status === SessionStatus.stopped
-              ? "❌"
-              : "⚠️"
-          }`
-      )
-      .join(" | ")
+    `✅ Active: ${
+      globalThis.streams.filter((s) => s.status === SessionStatus.live).length
+    }  | ⚠️ Error: ${
+      globalThis.streams.filter((s) => s.status === SessionStatus.error).length
+    } | ❌ Stopped: ${
+      globalThis.streams.filter(
+        (s) =>
+          s.status === SessionStatus.stopped ||
+          s.status === SessionStatus.connecting
+      ).length
+    } | ${globalThis.streams
+      .filter((s) => s.status !== SessionStatus.live)
+      .map((item) => item.id)
+      .join(", ")}`
   );
+
+  // logger.statusLine(
+  //   globalThis.streams
+  //     .map(
+  //       (session: SessionManagerItem): string =>
+  //         `${session.id} ${session.status} ${
+  //           session.status === SessionStatus.live
+  //             ? "✅"
+  //             : session.status === SessionStatus.stopped
+  //             ? "❌"
+  //             : "⚠️"
+  //         }`
+  //     )
+  //     .join(" | ")
+  // );
 }, 1000);
