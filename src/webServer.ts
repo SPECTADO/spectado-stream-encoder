@@ -103,7 +103,35 @@ function generateStatusHTML(): string {
     }
   };
 
-  const streamsRows = streams
+  // Sort streams: error/connecting first, then stopped, then live
+  const sortedStreams = streams.sort((a, b) => {
+    const getStatusPriority = (status: SessionStatus): number => {
+      switch (status) {
+        case SessionStatus.error:
+          return 0; // Highest priority - show first
+        case SessionStatus.connecting:
+          return 1; // Second priority
+        case SessionStatus.stopped:
+          return 2; // Third priority
+        case SessionStatus.live:
+          return 3; // Lowest priority - show last
+        default:
+          return 4; // Unknown status last
+      }
+    };
+
+    const priorityA = getStatusPriority(a.status);
+    const priorityB = getStatusPriority(b.status);
+
+    // If same priority, sort by stream ID alphabetically
+    if (priorityA === priorityB) {
+      return a.id.localeCompare(b.id);
+    }
+
+    return priorityA - priorityB;
+  });
+
+  const streamsRows = sortedStreams
     .map(
       (stream: SessionManagerItem) => `
     <tr class="${getStatusClass(stream.status)}">
