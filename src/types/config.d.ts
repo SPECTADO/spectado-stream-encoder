@@ -12,6 +12,7 @@ export interface EncoderConfig {
   samplerate?: number;
   format?: string;
   captureAudioCard: string;
+  audioFilter?: string;
   enableNormalize?: boolean;
   icecast: IcecastConfig;
 }

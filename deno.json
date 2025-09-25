@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "dev": "deno run --allow-read --allow-write --allow-net --allow-run --allow-env --watch main.ts",
+    "dev": "deno run --allow-all --watch main.ts",
 
     "dist": "deno task compile && deno task ffmpeg",
     "build": "deno task compile-win && deno task compile-darwin && deno task compile-darwin-intel && deno task compile-linux && deno task compile-linux-arm",

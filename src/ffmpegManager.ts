@@ -48,6 +48,12 @@ export const creatFfmpegConfig = (encoderConfig: EncoderConfig) => {
   argv.push("-i");
   argv.push(captureAudioCard);
 
+  if (encoderConfig.audioFilter) {
+    // -filter:a "pan=stereo|c0=c8|c1=c9"
+    argv.push("-filter:a");
+    argv.push(encoderConfig.audioFilter);
+  }
+
   if (encoderConfig.format === "aac") {
     argv.push("-acodec");
     argv.push("aac");
