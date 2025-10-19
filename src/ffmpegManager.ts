@@ -45,16 +45,19 @@ export const creatFfmpegConfig = (encoderConfig: EncoderConfig) => {
   argv.push("info");
   argv.push("-f");
   argv.push(globalThis.config.ffmpegCaptureMode);
+  argv.push("-thread_queue_size");
+  argv.push("4096");
+  // -guess_layout_max 0 → prevents FFmpeg from auto-assigning a surround layout; channels are treated as c0, c1, c2… in order.
+  argv.push("-guess_layout_max");
+  argv.push("0");
+
   argv.push("-i");
-  argv.push(captureAudioCard);
+  argv.push(`${captureAudioCard}`);
 
   if (encoderConfig.audioFilter) {
-    // -guess_layout_max 0 → prevents FFmpeg from auto-assigning a surround layout; channels are treated as c0, c1, c2… in order.
-    argv.push("-guess_layout_max");
-    argv.push("0");
     // -filter:a "pan=stereo|c0=c8|c1=c9"
     argv.push("-filter:a");
-    argv.push(encoderConfig.audioFilter);
+    argv.push(`${encoderConfig.audioFilter}`);
   }
 
   if (encoderConfig.format === "aac") {
@@ -86,12 +89,17 @@ export const creatFfmpegConfig = (encoderConfig: EncoderConfig) => {
     }
         */
 
-  argv.push("-f");
   if (encoderConfig.format === "aac" || encoderConfig.format === "aac+") {
+    argv.push("-content_type");
+
+    argv.push("-f");
     argv.push("adts");
   }
 
   if (!encoderConfig.format || encoderConfig.format === "mp3") {
+    argv.push("-content_type");
+    argv.push("audio/mpeg");
+    argv.push("-f");
     argv.push("mp3");
   }
   argv.push(
@@ -119,6 +127,8 @@ export const startAndWatchEncoderThread = async (
     stdout: "piped",
     stderr: "piped",
   });
+
+  logger.log(`[FFMPEG] Starting encoder ffmpeg ${argv?.join(" ")}`);
 
   const ffmpeg_exec = command.spawn();
 
@@ -152,5 +162,5 @@ export const startAndWatchEncoderThread = async (
     updateSessionStatus(session.id, SessionStatus.stopped);
   }, restartOnError * 1000);
 
-  logger.error("[ffmpeg] process with ${ffmpeg_exec.pid} error", { rawError });
+  logger.error(`[ffmpeg] process with ${ffmpeg_exec.pid} error`, { rawError });
 };
