@@ -49,6 +49,9 @@ export const creatFfmpegConfig = (encoderConfig: EncoderConfig) => {
   argv.push(captureAudioCard);
 
   if (encoderConfig.audioFilter) {
+    // -guess_layout_max 0 → prevents FFmpeg from auto-assigning a surround layout; channels are treated as c0, c1, c2… in order.
+    argv.push("-guess_layout_max");
+    argv.push("0");
     // -filter:a "pan=stereo|c0=c8|c1=c9"
     argv.push("-filter:a");
     argv.push(encoderConfig.audioFilter);
@@ -66,13 +69,14 @@ export const creatFfmpegConfig = (encoderConfig: EncoderConfig) => {
 
   if (!encoderConfig.format || encoderConfig.format === "mp3") {
     argv.push("-acodec");
-    argv.push("mp3");
+    //argv.push("mp3");
+    argv.push("libmp3lame");
   }
 
   argv.push("-ab");
   argv.push(`${encoderConfig.bitrate || 128}k`);
   argv.push("-ac");
-  argv.push((encoderConfig.chanels || 2).toString()); // chnnels
+  argv.push((encoderConfig.channels || 2).toString()); // channels
   argv.push("-ar");
   argv.push((encoderConfig.samplerate || 44100).toString()); // sample rate
   /*

@@ -8,7 +8,7 @@ export interface IcecastConfig {
 export interface EncoderConfig {
   id: string;
   bitrate?: number;
-  chanels?: number;
+  channels?: number;
   samplerate?: number;
   format?: string;
   captureAudioCard: string;

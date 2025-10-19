@@ -222,6 +222,112 @@ function generateStatusHTML(): string {
         .error { color: #dc3545; }
         .stopped { color: #6c757d; }
         
+        .config-section {
+            margin-bottom: 20px;
+        }
+        
+        .config-header {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-bottom: 2px solid #f8f9fa;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            transition: background-color 0.2s ease;
+        }
+        
+        .config-header:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .config-header h2 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+        
+        .config-toggle {
+            font-size: 14px;
+            color: #6c757d;
+            transition: transform 0.3s ease;
+        }
+        
+        .config-section.collapsed .config-toggle {
+            transform: rotate(-90deg);
+        }
+        
+        .config-section.collapsed .config-header {
+            border-radius: 8px;
+            border-bottom: none;
+        }
+        
+        .config-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            background: white;
+            padding: 20px;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            overflow: hidden;
+            max-height: 1000px;
+        }
+        
+        .config-section.collapsed .config-cards {
+            max-height: 0;
+            padding: 0 20px;
+        }
+        
+        .config-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+        }
+        
+        .config-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: #495057;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 8px;
+        }
+        
+        .config-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding: 4px 0;
+        }
+        
+        .config-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .config-label {
+            font-weight: 500;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .config-value {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 13px;
+            color: #495057;
+            max-width: 60%;
+            word-break: break-all;
+            text-align: right;
+        }
+        
         .table-container {
             background: white;
             border-radius: 8px;
@@ -293,6 +399,26 @@ function generateStatusHTML(): string {
                 min-width: 100px;
             }
             
+            .config-cards {
+                grid-template-columns: 1fr;
+                padding: 15px;
+            }
+            
+            .config-card {
+                padding: 12px;
+            }
+            
+            .config-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+            
+            .config-value {
+                max-width: 100%;
+                text-align: left;
+            }
+            
             table {
                 font-size: 14px;
             }
@@ -329,10 +455,28 @@ function generateStatusHTML(): string {
             }
         }
         
+        function toggleConfigSection() {
+            const configSection = document.querySelector('.config-section');
+            if (configSection) {
+                configSection.classList.toggle('collapsed');
+                
+                // Save the collapsed state in localStorage
+                const isCollapsed = configSection.classList.contains('collapsed');
+                localStorage.setItem('configSectionCollapsed', isCollapsed.toString());
+            }
+        }
+        
         window.addEventListener('load', () => {
             // Auto-start refresh on page load
             startAutoRefresh();
             document.querySelector('.auto-refresh').addEventListener('click', toggleAutoRefresh);
+            
+            // Restore configuration section collapsed state
+            const configSection = document.querySelector('.config-section');
+            const isCollapsed = localStorage.getItem('configSectionCollapsed') === 'true';
+            if (isCollapsed && configSection) {
+                configSection.classList.add('collapsed');
+            }
         });
     </script>
 </head>
@@ -358,6 +502,54 @@ function generateStatusHTML(): string {
         <div class="summary-card">
             <h3>Total</h3>
             <p class="number">${streams.length}</p>
+        </div>
+    </div>
+    
+    <div class="config-section">
+        <div class="config-header" onclick="toggleConfigSection()">
+            <h2>Configuration</h2>
+            <span class="config-toggle">▼</span>
+        </div>
+        <div class="config-cards" id="config-content">
+            ${
+              globalThis.config
+                ? globalThis.config.encoders
+                    .map(
+                      (encoder) => `
+            <div class="config-card">
+                <h3>${encoder.id}</h3>
+                <div class="config-item">
+                    <span class="config-label">Audio Card:</span>
+                    <span class="config-value">${
+                      encoder.captureAudioCard
+                    }</span>
+                </div>
+                <div class="config-item">
+                    <span class="config-label">Format:</span>
+                    <span class="config-value">${encoder.format || "mp3"}</span>
+                </div>
+                <div class="config-item">
+                    <span class="config-label">Bitrate:</span>
+                    <span class="config-value">${
+                      encoder.bitrate || 128
+                    } kbps</span>
+                </div>
+                ${
+                  encoder.audioFilter
+                    ? `
+                <div class="config-item">
+                    <span class="config-label">Audio Filter:</span>
+                    <span class="config-value">${encoder.audioFilter}</span>
+                </div>
+                `
+                    : ""
+                }
+            </div>
+            `
+                    )
+                    .join("")
+                : "<p>Configuration not loaded</p>"
+            }
         </div>
     </div>
     
