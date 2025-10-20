@@ -1,5 +1,5 @@
 {
-  "version": "4",
+  "version": "5",
   "specifiers": {
     "jsr:@std/assert@1": "1.0.6",
     "jsr:@std/internal@^1.0.4": "1.0.4",
@@ -7,7 +7,8 @@
     "npm:chalk@^5.3.0": "5.3.0",
     "npm:dayjs@^1.10.4": "1.11.13",
     "npm:ffbinaries@1.1.6": "1.1.6",
-    "npm:ffbinaries@^1.1.6": "1.1.6"
+    "npm:ffbinaries@^1.1.6": "1.1.6",
+    "npm:lodash@*": "4.17.21"
   },
   "jsr": {
     "@std/assert@1.0.6": {
@@ -134,7 +135,8 @@
         "debug",
         "mkdirp",
         "yauzl"
-      ]
+      ],
+      "bin": true
     },
     "extsprintf@1.3.0": {
       "integrity": "sha512-11Ndz7Nv+mvAC1j0ktTa7fAb0vLyGGX+rMHNBYQviQDGU0Hw7lhctJANqbPhu9nV9/izT/IntTgZ7Im/9LJs9g=="
@@ -160,7 +162,8 @@
         "fs-extra",
         "lodash",
         "request"
-      ]
+      ],
+      "bin": true
     },
     "forever-agent@0.6.1": {
       "integrity": "sha512-j0KLYPhm6zeac4lz3oJ3o65qvgQCcPubiyotZrXqEaG4hNagNYO8qdlUrX5vwqv9ohqeT/Z3j6+yW067yWWdUw=="
@@ -198,7 +201,8 @@
       "dependencies": [
         "ajv",
         "har-schema"
-      ]
+      ],
+      "deprecated": true
     },
     "http-signature@1.2.0": {
       "integrity": "sha512-CAbnr6Rz4CYQkLYUtSNXxQPUH2gK8f3iWexVlsnMeD+GjlsQ0Xsy1cOX+mN3dtxYomRy21CiOzU8Uhw6OwncEQ==",
@@ -234,7 +238,7 @@
     },
     "jsonfile@4.0.0": {
       "integrity": "sha512-m6F1R3z8jjlf2imQHS2Qez5sjKWQzbuuhuJ/FKYFRZvPE3PuHcSMVZzfsLhGVOkfd20obL5SWEBew5ShlquNxg==",
-      "dependencies": [
+      "optionalDependencies": [
         "graceful-fs"
       ]
     },
@@ -266,7 +270,8 @@
       "integrity": "sha512-FP+p8RB8OWpF3YZBCrP5gtADmtXApB5AMLn+vdyA+PyxCjrCs00mjyUozssO33cwDeT3wNGdLxJ5M//YqtHAJw==",
       "dependencies": [
         "minimist"
-      ]
+      ],
+      "bin": true
     },
     "ms@2.0.0": {
       "integrity": "sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A=="
@@ -327,7 +332,8 @@
         "tough-cookie",
         "tunnel-agent",
         "uuid"
-      ]
+      ],
+      "deprecated": true
     },
     "safe-buffer@5.1.2": {
       "integrity": "sha512-Gd2UZBJDkXlY7GbJxfsE8/nvKkUEU1G38c1siN6QP6a9PT9MmHB8GnpscSmMJSoF8LOIrt8ud/wPtojys4G6+g=="
@@ -350,7 +356,8 @@
         "jsbn",
         "safer-buffer",
         "tweetnacl"
-      ]
+      ],
+      "bin": true
     },
     "string_decoder@1.1.1": {
       "integrity": "sha512-n/ShnvDi6FHbbVfviro+WojiFzv+s8MPMHBczVePfUpDJLwoLT0ht1l4YwBCbi8pJAveEEdnkHyPyTP/mzRfwg==",
@@ -393,7 +400,9 @@
       "integrity": "sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw=="
     },
     "uuid@3.4.0": {
-      "integrity": "sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A=="
+      "integrity": "sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==",
+      "deprecated": true,
+      "bin": true
     },
     "verror@1.10.0": {
       "integrity": "sha512-ZZKSmDAEFOijERBLkmYfJ+vmk3w+7hOLYDNkRCuRuMJGEmqYNCNLyBBFwWKVMhfwaEF3WOd0Zlw86U/WC/+nYw==",
@@ -413,7 +422,10 @@
   },
   "redirects": {
     "https://deno.land/std/fs/mod.ts": "https://deno.land/std@0.224.0/fs/mod.ts",
-    "https://esm.sh/dayjs": "https://esm.sh/dayjs@1.11.13"
+    "https://esm.sh/@types/lodash@~4.17.14/index.d.ts": "https://esm.sh/@types/lodash@4.17.20/index.d.ts",
+    "https://esm.sh/dayjs": "https://esm.sh/dayjs@1.11.13",
+    "https://esm.sh/lodash": "https://esm.sh/lodash@4.17.21",
+    "https://esm.sh/mkdirp": "https://esm.sh/mkdirp@3.0.1"
   },
   "remote": {
     "https://deno.land/std@0.224.0/assert/assert.ts": "09d30564c09de846855b7b071e62b5974b001bb72a4b797958fe0660e7849834",
@@ -481,6 +493,10 @@
     "https://deno.land/std@0.224.0/path/windows/normalize_glob.ts": "9c87a829b6c0f445d03b3ecadc14492e2864c3ebb966f4cea41e98326e4435c6",
     "https://deno.land/std@0.224.0/path/windows/resolve.ts": "8dae1dadfed9d46ff46cc337c9525c0c7d959fb400a6308f34595c45bdca1972",
     "https://esm.sh/dayjs@1.11.13": "9e26962f5cf0e45efb9d4ca5a43fabce85ba5e5027d0a8cfc30d6d10368a86f5",
+    "https://esm.sh/lodash@4.17.21": "c2f90ffd948b7a30f054986888bdc2667824115fa48ad583ca8b3a579ca4a5a8",
+    "https://esm.sh/lodash@4.17.21/denonext/lodash.mjs": "9d2a44e584d91008f61f974c6d0a32bf9afb1563761e60c366af0a293e8c759b",
+    "https://esm.sh/mkdirp@3.0.1": "1613c4e637a1803ce195aa57b57ccfbf37643ab99a227fb38123b90630d1cebe",
+    "https://esm.sh/mkdirp@3.0.1/denonext/mkdirp.mjs": "fe49a0b5a9e49ab9074cdec254bda32bddbdda09e2ed29bf92d297005b6933be",
     "https://esm.sh/v135/dayjs@1.11.13/denonext/dayjs.mjs": "1cb45182e325c07c470907e10801bef7ff18b939bd2ed6545048024b3d01cf02"
   },
   "workspace": {

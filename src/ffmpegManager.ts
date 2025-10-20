@@ -2,10 +2,18 @@ import { EncoderConfig, IcecastConfig } from "/src/types/config.d.ts";
 import { updateSessionStatus, SessionStatus } from "/src/sessionManager.ts";
 import logger from "/src/logger.ts";
 import { SessionManagerItem } from "/src/types/sessionManager.d.ts";
+import lo from "https://esm.sh/lodash";
+import { mkdirp } from "https://esm.sh/mkdirp";
 
-const supportedFormats = ["mp3", "aac", "aac+"];
+const { isArray } = lo;
+const supportedFormats = ["mp3", "aac", "aac+", "hls", "dash"];
 const restartOnCleanExit = 5;
 const restartOnError = 20;
+
+const segmentDuration = 60; // in seconds
+const playlistWindowSizeInHours = 6; // hours
+const playlistSize =
+  Math.floor((playlistWindowSizeInHours * 3600) / segmentDuration) || 10;
 
 export const createFfmpegListDevicesConfig = () => {
   const argv: string[] = [];
@@ -21,25 +29,44 @@ export const createFfmpegListDevicesConfig = () => {
 };
 
 export const creatFfmpegConfig = (encoderConfig: EncoderConfig) => {
-  const icecastConfig: IcecastConfig = encoderConfig.icecast;
+  const argv: string[] =
+    encoderConfig?.format === "hls"
+      ? creatFfmpegConfigHLS(encoderConfig)
+      : encoderConfig?.format === "dash"
+      ? creatFfmpegConfigDash(encoderConfig)
+      : creatFfmpegConfigIcecast(encoderConfig);
+
+  logger.debug("[FFMPEG] create config", { encoderConfig, argv });
+  return argv;
+};
+
+const formatCaptureDeviceName = (deviceName: string): string => {
+  let captureAudioCard = deviceName;
+  // Windows (dshow) device name needs the audio= prefix and quoting
+  if (Deno.build.os === "windows") captureAudioCard = `audio="${deviceName}"`;
+
+  return captureAudioCard;
+};
+
+const creatFfmpegConfigIcecast = (
+  encoderConfig: EncoderConfig
+): string[] | null => {
   const argv: string[] = [];
+  const icecastConfig: IcecastConfig = encoderConfig.icecast;
 
   if (
     !encoderConfig.format ||
     supportedFormats.includes(encoderConfig.format) === false
   ) {
-    throw new Error(
-      `Invalid encoder format "${
-        encoderConfig.format
-      }". Supported: ${supportedFormats.join(",")}`
+    logger.error(
+      `[FFMPEG] Unsupported encoder format: ${encoderConfig.format}`
     );
-    return;
+    return null;
   }
 
-  let captureAudioCard = encoderConfig.captureAudioCard;
-  // Windows (dshow) device name needs the audio= prefix and quoting
-  if (Deno.build.os === "windows")
-    captureAudioCard = `audio="${encoderConfig.captureAudioCard}"`;
+  const captureAudioCard = formatCaptureDeviceName(
+    encoderConfig.captureAudioCard
+  );
 
   argv.push("-loglevel");
   argv.push("info");
@@ -112,16 +139,81 @@ export const creatFfmpegConfig = (encoderConfig: EncoderConfig) => {
   return argv;
 };
 
+const creatFfmpegConfigHLS = (
+  encoderConfig: EncoderConfig
+): string[] | null => {
+  const argv: string[] = [];
+
+  const captureAudioCard = formatCaptureDeviceName(
+    encoderConfig.captureAudioCard
+  );
+
+  mkdirp.sync(`${encoderConfig.outdir || "/tmp/hls"}`);
+
+  argv.push("-loglevel");
+  argv.push("info");
+  argv.push("-f");
+  argv.push(globalThis.config.ffmpegCaptureMode);
+  argv.push("-thread_queue_size");
+  argv.push("4096");
+  // -guess_layout_max 0 → prevents FFmpeg from auto-assigning a surround layout; channels are treated as c0, c1, c2… in order.
+  argv.push("-guess_layout_max");
+  argv.push("0");
+
+  argv.push("-i");
+  argv.push(`${captureAudioCard}`);
+
+  argv.push("-acodec");
+  argv.push("aac");
+
+  argv.push("-ab");
+  argv.push(`${encoderConfig.bitrate || 128}k`);
+  argv.push("-ac");
+  argv.push((encoderConfig.channels || 2).toString()); // channels
+  argv.push("-ar");
+  argv.push((encoderConfig.samplerate || 44100).toString()); // sample rate
+
+  // HLS specific options
+  argv.push("-f");
+  argv.push("hls");
+  argv.push("-hls_time");
+  argv.push(segmentDuration.toString()); // segment duration in seconds
+  argv.push("-hls_list_size");
+  argv.push(playlistSize.toString()); // number of segments in playlist
+  argv.push("-strftime", "1");
+  argv.push("-hls_segment_filename");
+  argv.push(`${encoderConfig.outdir || "/tmp/hls"}/%H%M%S.ts`); // segment file names based on datetime
+  argv.push("-hls_flags");
+  argv.push(
+    "delete_segments+omit_endlist+discont_start+append_list+program_date_time"
+  );
+
+  argv.push(`${encoderConfig.outdir || "/tmp/hls"}/playlist.m3u8`);
+
+  return argv;
+};
+
+const creatFfmpegConfigDash = (
+  encoderConfig: EncoderConfig
+): string[] | null => {
+  const argv: string[] = [];
+
+  return argv;
+};
+
 export const startAndWatchEncoderThread = async (
   session: SessionManagerItem
 ) => {
   if (!session) return false;
 
   const encoderConfig = session.encoder;
-  const argv = creatFfmpegConfig(encoderConfig);
+  const argv =
+    encoderConfig.customArgs && isArray(encoderConfig.customArgs)
+      ? encoderConfig.customArgs
+      : creatFfmpegConfig(encoderConfig);
 
   //const ffmpeg_exec = spawn("ffmpeg", argv);
-
+  if (!argv) return;
   const command = new Deno.Command(globalThis.config.ffmpegBinaryPath, {
     args: argv,
     stdout: "piped",

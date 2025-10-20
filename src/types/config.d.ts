@@ -14,6 +14,8 @@ export interface EncoderConfig {
   captureAudioCard: string;
   audioFilter?: string;
   enableNormalize?: boolean;
+  customArgs?: string[] | null;
+  outdir?: string | null;
   icecast: IcecastConfig;
 }
 
