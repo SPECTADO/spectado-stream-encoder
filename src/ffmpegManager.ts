@@ -3,7 +3,6 @@ import { updateSessionStatus, SessionStatus } from "/src/sessionManager.ts";
 import logger from "/src/logger.ts";
 import { SessionManagerItem } from "/src/types/sessionManager.d.ts";
 import lo from "https://esm.sh/lodash";
-import { mkdirp } from "https://esm.sh/mkdirp";
 
 const { isArray } = lo;
 const supportedFormats = ["mp3", "aac", "aac+"];
