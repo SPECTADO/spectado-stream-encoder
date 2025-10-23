@@ -6,7 +6,7 @@ import lo from "https://esm.sh/lodash";
 import { mkdirp } from "https://esm.sh/mkdirp";
 
 const { isArray } = lo;
-const supportedFormats = ["mp3", "aac", "aac+", "hls", "dash"];
+const supportedFormats = ["mp3", "aac", "aac+"];
 const restartOnCleanExit = 5;
 const restartOnError = 20;
 
@@ -28,18 +28,6 @@ export const createFfmpegListDevicesConfig = () => {
   return argv;
 };
 
-export const creatFfmpegConfig = (encoderConfig: EncoderConfig) => {
-  const argv: string[] =
-    encoderConfig?.format === "hls"
-      ? creatFfmpegConfigHLS(encoderConfig)
-      : encoderConfig?.format === "dash"
-      ? creatFfmpegConfigDash(encoderConfig)
-      : creatFfmpegConfigIcecast(encoderConfig);
-
-  logger.debug("[FFMPEG] create config", { encoderConfig, argv });
-  return argv;
-};
-
 const formatCaptureDeviceName = (deviceName: string): string => {
   let captureAudioCard = deviceName;
   // Windows (dshow) device name needs the audio= prefix and quoting
@@ -48,9 +36,7 @@ const formatCaptureDeviceName = (deviceName: string): string => {
   return captureAudioCard;
 };
 
-const creatFfmpegConfigIcecast = (
-  encoderConfig: EncoderConfig
-): string[] | null => {
+const creatFfmpegConfig = (encoderConfig: EncoderConfig): string[] | null => {
   const argv: string[] = [];
   const icecastConfig: IcecastConfig = encoderConfig.icecast;
 
@@ -136,68 +122,6 @@ const creatFfmpegConfigIcecast = (
   );
 
   logger.debug("[FFMPEG] create config", { encoderConfig, argv });
-  return argv;
-};
-
-const creatFfmpegConfigHLS = (
-  encoderConfig: EncoderConfig
-): string[] | null => {
-  const argv: string[] = [];
-
-  const captureAudioCard = formatCaptureDeviceName(
-    encoderConfig.captureAudioCard
-  );
-
-  mkdirp.sync(`${encoderConfig.outdir || "/tmp/hls"}`);
-
-  argv.push("-loglevel");
-  argv.push("info");
-  argv.push("-f");
-  argv.push(globalThis.config.ffmpegCaptureMode);
-  argv.push("-thread_queue_size");
-  argv.push("4096");
-  // -guess_layout_max 0 → prevents FFmpeg from auto-assigning a surround layout; channels are treated as c0, c1, c2… in order.
-  argv.push("-guess_layout_max");
-  argv.push("0");
-
-  argv.push("-i");
-  argv.push(`${captureAudioCard}`);
-
-  argv.push("-acodec");
-  argv.push("aac");
-
-  argv.push("-ab");
-  argv.push(`${encoderConfig.bitrate || 128}k`);
-  argv.push("-ac");
-  argv.push((encoderConfig.channels || 2).toString()); // channels
-  argv.push("-ar");
-  argv.push((encoderConfig.samplerate || 44100).toString()); // sample rate
-
-  // HLS specific options
-  argv.push("-f");
-  argv.push("hls");
-  argv.push("-hls_time");
-  argv.push(segmentDuration.toString()); // segment duration in seconds
-  argv.push("-hls_list_size");
-  argv.push(playlistSize.toString()); // number of segments in playlist
-  argv.push("-strftime", "1");
-  argv.push("-hls_segment_filename");
-  argv.push(`${encoderConfig.outdir || "/tmp/hls"}/%H%M%S.ts`); // segment file names based on datetime
-  argv.push("-hls_flags");
-  argv.push(
-    "delete_segments+omit_endlist+discont_start+append_list+program_date_time"
-  );
-
-  argv.push(`${encoderConfig.outdir || "/tmp/hls"}/playlist.m3u8`);
-
-  return argv;
-};
-
-const creatFfmpegConfigDash = (
-  encoderConfig: EncoderConfig
-): string[] | null => {
-  const argv: string[] = [];
-
   return argv;
 };
 
