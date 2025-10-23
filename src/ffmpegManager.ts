@@ -53,6 +53,7 @@ const creatFfmpegConfig = (encoderConfig: EncoderConfig): string[] | null => {
     encoderConfig.captureAudioCard
   );
 
+  argv.push("-hide_banner");
   argv.push("-loglevel");
   argv.push("info");
   argv.push("-f");
