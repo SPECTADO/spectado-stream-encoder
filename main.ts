@@ -9,7 +9,7 @@ import { SessionManagerItem } from "/src/types/sessionManager.d.ts";
 import { Config } from "/src/types/config.d.ts";
 import { startWebServer, stopWebServer } from "/src/webServer.ts";
 
-const VERSION = "1.0 beta 11";
+const VERSION = "1.0 beta 12";
 const STATUS_CHECK_INT = 1000;
 const CONFIG_RELOAD_INT = 30000;
 
