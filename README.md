@@ -61,6 +61,28 @@ Create config.json in same directory as executable
 | icecast->password | string         | Password for this mountpoint                                                                     | password                                                                                  |
 | icecast->server   | string         | Icecast server with optional port                                                                | icecast-server.example.com:8080                                                           |
 
+### custom ffmpeg config (if needed)
+
+```
+{
+  "ffmpegBinaryPath": "ffmpeg.exe",
+  "ffmpegCaptureMode": "dshow",
+  "encoders": [
+    {
+      "id": "test-128mp3",
+      "customArgs":[
+        "-f",
+        "avfoundation",
+        ...
+        "-f",
+        "mp3",
+        "icecast://icecast.com:8000/abb.mp3"
+      ]
+    }
+  ]
+}
+```
+
 ## captureAudioCard & ffmpegCaptureMode
 
 Identifing soundcard input is not so easy, but if you follow this guide, it is simple to understand.
