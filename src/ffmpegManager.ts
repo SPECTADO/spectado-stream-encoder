@@ -84,8 +84,8 @@ const creatFfmpegConfig = (encoderConfig: EncoderConfig): string[] | null => {
 
   if (!encoderConfig.format || encoderConfig.format === "mp3") {
     argv.push("-acodec");
-    //argv.push("mp3");
-    argv.push("libmp3lame");
+    argv.push("mp3");
+    //argv.push("libmp3lame");
   }
 
   argv.push("-ab");
