@@ -5,7 +5,7 @@ import { SessionManagerItem } from "/src/types/sessionManager.d.ts";
 import lo from "https://esm.sh/lodash";
 
 const { isArray } = lo;
-const supportedFormats = ["mp3", "aac", "aac+"];
+const supportedFormats = ["mp3", "mp3lame", "aac", "aac+"];
 const restartOnCleanExit = 5;
 const restartOnError = 20;
 
@@ -82,10 +82,14 @@ const creatFfmpegConfig = (encoderConfig: EncoderConfig): string[] | null => {
     argv.push("libfdk_aac");
   }
 
+  if (encoderConfig.format === "mp3lame") {
+    argv.push("-acodec");
+    argv.push("libmp3lame");
+  }
+
   if (!encoderConfig.format || encoderConfig.format === "mp3") {
     argv.push("-acodec");
     argv.push("mp3");
-    //argv.push("libmp3lame");
   }
 
   argv.push("-ab");
@@ -103,12 +107,16 @@ const creatFfmpegConfig = (encoderConfig: EncoderConfig): string[] | null => {
 
   if (encoderConfig.format === "aac" || encoderConfig.format === "aac+") {
     argv.push("-content_type");
-
+    argv.push("audio/mpeg");
     argv.push("-f");
     argv.push("adts");
   }
 
-  if (!encoderConfig.format || encoderConfig.format === "mp3") {
+  if (
+    !encoderConfig.format ||
+    encoderConfig.format === "mp3" ||
+    encoderConfig.format === "mp3lame"
+  ) {
     argv.push("-content_type");
     argv.push("audio/mpeg");
     argv.push("-f");
