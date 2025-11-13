@@ -30,7 +30,7 @@ export const createFfmpegListDevicesConfig = () => {
 const formatCaptureDeviceName = (deviceName: string): string => {
   let captureAudioCard = deviceName;
   // Windows (dshow) device name needs the audio= prefix and quoting
-  if (Deno.build.os === "windows") captureAudioCard = `audio="${deviceName}"`;
+  if (Deno.build.os === "windows") captureAudioCard = `audio=${deviceName}`;
 
   return captureAudioCard;
 };
