@@ -22,6 +22,11 @@ const logType = LOG_TYPES.WARNING;
 // const logType = LOG_TYPES.DEBUG;
 
 const logBuffer = [] as Array<{ type: LogLevelType; line: string }>;
+let suppressConsoleOutput = false;
+
+const setSuppressConsoleOutput = (suppress: boolean) => {
+  suppressConsoleOutput = suppress;
+};
 
 const addToLogBuffer = (type: LogLevelType, line: string) => {
   logBuffer.push({ type, line });
@@ -39,31 +44,49 @@ const logTime = () => {
 
 const log = (...args: any[]) => {
   addToLogBuffer(LOG_TYPES.INFO, args.join(" "));
+  if (!suppressConsoleOutput) {
+    console.log(`[${logTime()}]`, ...args);
+  }
 };
 
 const info = (...args: any[]) => {
   if (logType < LOG_TYPES.INFO) return;
   addToLogBuffer(LOG_TYPES.INFO, args.join(" "));
+  if (!suppressConsoleOutput) {
+    console.log(`[${logTime()}] INFO:`, ...args);
+  }
 };
 
 const warn = (...args: any[]) => {
   if (logType < LOG_TYPES.WARNING) return;
   addToLogBuffer(LOG_TYPES.WARNING, args.join(" "));
+  if (!suppressConsoleOutput) {
+    console.warn(`[${logTime()}] WARN:`, ...args);
+  }
 };
 
 const error = (...args: any[]) => {
   if (logType < LOG_TYPES.ERROR) return;
   addToLogBuffer(LOG_TYPES.ERROR, args.join(" "));
+  if (!suppressConsoleOutput) {
+    console.error(`[${logTime()}] ERROR:`, ...args);
+  }
 };
 
 const debug = (...args: any[]) => {
   if (logType < LOG_TYPES.DEBUG) return;
   addToLogBuffer(LOG_TYPES.DEBUG, args.join(" "));
+  if (!suppressConsoleOutput) {
+    console.log(`[${logTime()}] DEBUG:`, ...args);
+  }
 };
 
 const ffdebug = (...args: any[]) => {
   if (logType < LOG_TYPES.FFDEBUG) return;
   addToLogBuffer(LOG_TYPES.FFDEBUG, args.join(" "));
+  if (!suppressConsoleOutput) {
+    console.log(`[${logTime()}] FFDEBUG:`, ...args);
+  }
 };
 
 export default {
@@ -74,4 +97,5 @@ export default {
   error,
   debug,
   ffdebug,
+  setSuppressConsoleOutput,
 };

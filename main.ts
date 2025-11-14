@@ -8,6 +8,7 @@ import {
 import { SessionManagerItem } from "/src/types/sessionManager.d.ts";
 import { Config } from "/src/types/config.d.ts";
 import { startWebServer, stopWebServer } from "/src/webServer.ts";
+import { StreamEncoderTUI } from "/src/tui.ts";
 
 const VERSION = "1.1.0";
 const STATUS_CHECK_INT = 1000;
@@ -20,9 +21,14 @@ declare global {
   var streams: Array<SessionManagerItem>;
 }
 
+let tui: StreamEncoderTUI | null = null;
+
 Deno.addSignalListener("SIGINT", () => {
   logger.log("SIGINT received - stopping services...");
   stopWebServer();
+  if (tui) {
+    tui.close();
+  }
   logger.log("Exiting...");
   Deno.exit();
 });
@@ -37,9 +43,23 @@ if (import.meta.main) {
 
   globalThis.streams = [] as SessionManagerItem[];
 
+  // Check if TUI mode is enabled
+  const enableTUI = true; //args.tui === "true" || args.ui === "true";
+
+  if (enableTUI) {
+    logger.log("Starting in TUI mode...");
+    logger.setSuppressConsoleOutput(true); // Suppress console output for TUI
+    tui = new StreamEncoderTUI();
+  }
+
   //syncConfigToSession();
   reloadConfig();
   checkSessionsStatus();
+
+  // Start TUI if enabled
+  if (tui) {
+    tui.run();
+  }
 }
 
 async function reloadConfig() {
@@ -66,22 +86,25 @@ setInterval(() => {
   checkSessionsStatus();
 }, STATUS_CHECK_INT);
 
-// main event loop
+// main event loop - only show console output if TUI is not enabled
 setInterval(() => {
-  console.log(
-    `✅ Active: ${
-      globalThis.streams.filter((s) => s.status === SessionStatus.live).length
-    }  | ⚠️ Error: ${
-      globalThis.streams.filter((s) => s.status === SessionStatus.error).length
-    } | ❌ Stopped: ${
-      globalThis.streams.filter(
-        (s) =>
-          s.status === SessionStatus.stopped ||
-          s.status === SessionStatus.connecting
-      ).length
-    } | ${globalThis.streams
-      .filter((s) => s.status === SessionStatus.error)
-      .map((item) => item.id)
-      .join(", ")}`
-  );
+  if (!tui) {
+    console.log(
+      `✅ Active: ${
+        globalThis.streams.filter((s) => s.status === SessionStatus.live).length
+      }  | ⚠️ Error: ${
+        globalThis.streams.filter((s) => s.status === SessionStatus.error)
+          .length
+      } | ❌ Stopped: ${
+        globalThis.streams.filter(
+          (s) =>
+            s.status === SessionStatus.stopped ||
+            s.status === SessionStatus.connecting
+        ).length
+      } | ${globalThis.streams
+        .filter((s) => s.status === SessionStatus.error)
+        .map((item) => item.id)
+        .join(", ")}`
+    );
+  }
 }, 1000);
