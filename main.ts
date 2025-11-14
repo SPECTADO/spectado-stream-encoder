@@ -9,7 +9,7 @@ import { SessionManagerItem } from "/src/types/sessionManager.d.ts";
 import { Config } from "/src/types/config.d.ts";
 import { startWebServer, stopWebServer } from "/src/webServer.ts";
 
-const VERSION = "1.0 beta 12";
+const VERSION = "1.1.0";
 const STATUS_CHECK_INT = 1000;
 const CONFIG_RELOAD_INT = 30000;
 
@@ -18,8 +18,6 @@ declare global {
   var config: Config;
   // deno-lint-ignore no-var
   var streams: Array<SessionManagerItem>;
-  // deno-lint-ignore no-var
-  var wasLastLoggerLineStatus: boolean;
 }
 
 Deno.addSignalListener("SIGINT", () => {
@@ -70,7 +68,7 @@ setInterval(() => {
 
 // main event loop
 setInterval(() => {
-  logger.statusLine(
+  console.log(
     `✅ Active: ${
       globalThis.streams.filter((s) => s.status === SessionStatus.live).length
     }  | ⚠️ Error: ${

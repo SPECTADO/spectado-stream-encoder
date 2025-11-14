@@ -1,7 +1,13 @@
 // deno-lint-ignore-file no-explicit-any
-import chalk from "chalk";
-import process from "node:process";
 import dayjs from "dayjs";
+
+export type LogLevelType =
+  | 0 // NONE
+  | 1 // ERROR
+  | 2 // WARNING
+  | 3 // INFO
+  | 4 // DEBUG
+  | 5; // FFDEBUG
 
 export const LOG_TYPES = {
   NONE: 0,
@@ -10,10 +16,20 @@ export const LOG_TYPES = {
   INFO: 3,
   DEBUG: 4,
   FFDEBUG: 5,
-};
+} as const;
 
 const logType = LOG_TYPES.WARNING;
 // const logType = LOG_TYPES.DEBUG;
+
+const logBuffer = [] as Array<{ type: LogLevelType; line: string }>;
+
+const addToLogBuffer = (type: LogLevelType, line: string) => {
+  logBuffer.push({ type, line });
+
+  if (logBuffer.length > 10) {
+    logBuffer.shift();
+  }
+};
 
 const logTime = () => {
   return dayjs().format("HH:mm:ss");
@@ -21,69 +37,38 @@ const logTime = () => {
   //const nowDate = new Date(); return `${nowDate.toLocaleDateString()} ${nowDate.toLocaleTimeString([], {  hour12: false,})}`;
 };
 
-const clearStatusLine = () => {
-  if (globalThis.wasLastLoggerLineStatus === true) {
-    // Move cursor up one line and clear it
-    Deno.stdout.writeSync(new TextEncoder().encode("\x1b[1A\x1b[2K"));
-    globalThis.wasLastLoggerLineStatus = false;
-  }
-};
-
 const log = (...args: any[]) => {
-  clearStatusLine();
-  console.log(logTime(), process.pid, chalk.bold.green(">>"), ...args);
-  globalThis.wasLastLoggerLineStatus = false;
+  addToLogBuffer(LOG_TYPES.INFO, args.join(" "));
 };
 
 const info = (...args: any[]) => {
   if (logType < LOG_TYPES.INFO) return;
-  clearStatusLine();
-  console.log(logTime(), process.pid, chalk.bold.blue("[INFO]"), ...args);
-  globalThis.wasLastLoggerLineStatus = false;
-};
-
-const statusLine = (...args: any[]) => {
-  clearStatusLine();
-  console.log(logTime(), process.pid, chalk.bold.green("→"), ...args);
-  globalThis.wasLastLoggerLineStatus = true;
+  addToLogBuffer(LOG_TYPES.INFO, args.join(" "));
 };
 
 const warn = (...args: any[]) => {
   if (logType < LOG_TYPES.WARNING) return;
-  clearStatusLine();
-  console.log(logTime(), process.pid, chalk.bold.yellow("[WARN]"), ...args);
-  globalThis.wasLastLoggerLineStatus = false;
+  addToLogBuffer(LOG_TYPES.WARNING, args.join(" "));
 };
 
 const error = (...args: any[]) => {
   if (logType < LOG_TYPES.ERROR) return;
-  clearStatusLine();
-  console.log(logTime(), process.pid, chalk.bold.redBright("[ERROR]"), ...args);
-  globalThis.wasLastLoggerLineStatus = false;
+  addToLogBuffer(LOG_TYPES.ERROR, args.join(" "));
 };
 
 const debug = (...args: any[]) => {
   if (logType < LOG_TYPES.DEBUG) return;
-  clearStatusLine();
-  console.log(
-    logTime(),
-    process.pid,
-    chalk.bold.blueBright("[DEBUG]"),
-    ...args
-  );
-  globalThis.wasLastLoggerLineStatus = false;
+  addToLogBuffer(LOG_TYPES.DEBUG, args.join(" "));
 };
 
 const ffdebug = (...args: any[]) => {
   if (logType < LOG_TYPES.FFDEBUG) return;
-  clearStatusLine();
-  console.log(logTime(), process.pid, chalk.bold.bgYellow("[FFMPEG]"), ...args);
-  globalThis.wasLastLoggerLineStatus = false;
+  addToLogBuffer(LOG_TYPES.FFDEBUG, args.join(" "));
 };
 
 export default {
+  logBuffer,
   log,
-  statusLine,
   info,
   warn,
   error,
