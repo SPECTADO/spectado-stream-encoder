@@ -43,14 +43,8 @@ if (import.meta.main) {
 
   globalThis.streams = [] as SessionManagerItem[];
 
-  // Check if TUI mode is enabled
-  const enableTUI = true; //args.tui === "true" || args.ui === "true";
-
-  if (enableTUI) {
-    logger.log("Starting in TUI mode...");
-    logger.setSuppressConsoleOutput(true); // Suppress console output for TUI
-    tui = new StreamEncoderTUI();
-  }
+  logger.setSuppressConsoleOutput(true); // Suppress console output for TUI
+  tui = new StreamEncoderTUI();
 
   //syncConfigToSession();
   reloadConfig();

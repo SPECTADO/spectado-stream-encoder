@@ -36,6 +36,21 @@ const addToLogBuffer = (type: LogLevelType, line: string) => {
   }
 };
 
+const formatArgs = (...args: any[]): string => {
+  return args
+    .map((arg) => {
+      if (typeof arg === "object" && arg !== null) {
+        try {
+          return JSON.stringify(arg, null, 0);
+        } catch {
+          return String(arg);
+        }
+      }
+      return String(arg);
+    })
+    .join(" ");
+};
+
 const logTime = () => {
   return dayjs().format("HH:mm:ss");
 
@@ -43,7 +58,7 @@ const logTime = () => {
 };
 
 const log = (...args: any[]) => {
-  addToLogBuffer(LOG_TYPES.INFO, args.join(" "));
+  addToLogBuffer(LOG_TYPES.INFO, formatArgs(...args));
   if (!suppressConsoleOutput) {
     console.log(`[${logTime()}]`, ...args);
   }
@@ -51,7 +66,7 @@ const log = (...args: any[]) => {
 
 const info = (...args: any[]) => {
   if (logType < LOG_TYPES.INFO) return;
-  addToLogBuffer(LOG_TYPES.INFO, args.join(" "));
+  addToLogBuffer(LOG_TYPES.INFO, formatArgs(...args));
   if (!suppressConsoleOutput) {
     console.log(`[${logTime()}] INFO:`, ...args);
   }
@@ -59,7 +74,7 @@ const info = (...args: any[]) => {
 
 const warn = (...args: any[]) => {
   if (logType < LOG_TYPES.WARNING) return;
-  addToLogBuffer(LOG_TYPES.WARNING, args.join(" "));
+  addToLogBuffer(LOG_TYPES.WARNING, formatArgs(...args));
   if (!suppressConsoleOutput) {
     console.warn(`[${logTime()}] WARN:`, ...args);
   }
@@ -67,7 +82,7 @@ const warn = (...args: any[]) => {
 
 const error = (...args: any[]) => {
   if (logType < LOG_TYPES.ERROR) return;
-  addToLogBuffer(LOG_TYPES.ERROR, args.join(" "));
+  addToLogBuffer(LOG_TYPES.ERROR, formatArgs(...args));
   if (!suppressConsoleOutput) {
     console.error(`[${logTime()}] ERROR:`, ...args);
   }
@@ -75,7 +90,7 @@ const error = (...args: any[]) => {
 
 const debug = (...args: any[]) => {
   if (logType < LOG_TYPES.DEBUG) return;
-  addToLogBuffer(LOG_TYPES.DEBUG, args.join(" "));
+  addToLogBuffer(LOG_TYPES.DEBUG, formatArgs(...args));
   if (!suppressConsoleOutput) {
     console.log(`[${logTime()}] DEBUG:`, ...args);
   }
@@ -83,7 +98,7 @@ const debug = (...args: any[]) => {
 
 const ffdebug = (...args: any[]) => {
   if (logType < LOG_TYPES.FFDEBUG) return;
-  addToLogBuffer(LOG_TYPES.FFDEBUG, args.join(" "));
+  addToLogBuffer(LOG_TYPES.FFDEBUG, formatArgs(...args));
   if (!suppressConsoleOutput) {
     console.log(`[${logTime()}] FFDEBUG:`, ...args);
   }

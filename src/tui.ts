@@ -322,26 +322,127 @@ export class StreamEncoderTUI {
     // Clear content area
     this.clearArea(contentX, contentY, contentWidth, contentHeight);
 
-    // Get encoders in error state
-    const errorEncoders =
-      globalThis.streams?.filter(
-        (s: SessionManagerItem) => s.status === SessionStatus.error
-      ) || [];
+    // Get latest error messages from logBuffer
+    const errorLogs = logger.logBuffer.filter((log) => log.type === 1); // ERROR type
+    const warningLogs = logger.logBuffer.filter((log) => log.type === 2); // WARNING type
 
-    if (errorEncoders.length === 0) {
-      console.log(
-        `\x1B[${contentY};${contentX}H${chalk.green("🎉 No errors detected")}`
-      );
-    } else {
-      const errorIds = errorEncoders.map((e) => e.id).join(", ");
-      const errorText = `Error Encoders: ${errorIds}`;
-      const truncatedText =
-        errorText.length > contentWidth
-          ? errorText.substring(0, contentWidth - 3) + "..."
-          : errorText;
+    // Combine errors and warnings, prioritize errors
+    const allProblematicLogs = [...errorLogs, ...warningLogs];
 
-      console.log(`\x1B[${contentY};${contentX}H${chalk.red(truncatedText)}`);
+    // Debug info - show on first line
+    const logTypes = logger.logBuffer.map((log) => `${log.type}`).join(",");
+    console.log(
+      `\x1B[${contentY};${contentX}H${chalk.magenta(
+        `E:${errorLogs.length} W:${warningLogs.length} Total:${logger.logBuffer.length}`
+      )}`
+    );
+
+    // Start content from second line
+    let currentLine = 1;
+
+    // Debug: Show logBuffer info if no problems found
+    if (allProblematicLogs.length === 0) {
+      if (logger.logBuffer.length === 0) {
+        console.log(
+          `\x1B[${contentY + currentLine};${contentX}H${chalk.gray(
+            "📝 No logs yet"
+          )}`
+        );
+      } else {
+        console.log(
+          `\x1B[${contentY + currentLine};${contentX}H${chalk.green(
+            "🎉 No issues detected"
+          )}`
+        );
+      }
+      return;
     }
+
+    // Show errors if we have them
+    if (errorLogs.length > 0) {
+      const latestError = errorLogs[errorLogs.length - 1]; // Get most recent error
+      console.log(
+        `\x1B[${contentY + currentLine};${contentX}H${chalk.red(
+          `❌ ${latestError.line}`
+        )}`
+      );
+      return;
+    }
+
+    // Process problems from most recent backwards (currentLine already set to 1)
+    for (
+      let i = allProblematicLogs.length - 1;
+      i >= 0 && currentLine < contentHeight;
+      i--
+    ) {
+      const problemLog = allProblematicLogs[i];
+      const isError = problemLog.type === 1;
+      const prefix = isError ? "❌" : "⚠️";
+      const problemText = `${prefix} ${problemLog.line}`;
+      const color = isError ? chalk.red : chalk.yellow;
+
+      // Wrap long text to multiple lines (max 3 lines per error)
+      const maxLinesPerError = 3;
+      const wrappedLines = this.wrapText(
+        problemText,
+        contentWidth,
+        maxLinesPerError
+      );
+
+      // Check if we have enough space for this error
+      if (currentLine + wrappedLines.length > contentHeight) {
+        break; // Not enough space, stop processing
+      }
+
+      // Display wrapped lines
+      wrappedLines.forEach((line) => {
+        console.log(
+          `\x1B[${contentY + currentLine};${contentX}H${color(line)}`
+        );
+        currentLine++;
+      });
+
+      // Add a small gap between errors if there's space
+      if (currentLine < contentHeight - 1 && i > 0) {
+        currentLine++;
+      }
+    }
+  }
+
+  private wrapText(text: string, maxWidth: number, maxLines: number): string[] {
+    if (text.length <= maxWidth) {
+      return [text];
+    }
+
+    const words = text.split(" ");
+    const lines: string[] = [];
+    let currentLine = "";
+
+    for (const word of words) {
+      if (lines.length >= maxLines) {
+        // If we're at max lines, truncate the last line
+        if (lines[lines.length - 1].length + 3 <= maxWidth) {
+          lines[lines.length - 1] =
+            lines[lines.length - 1].substring(0, maxWidth - 3) + "...";
+        }
+        break;
+      }
+
+      if (currentLine.length === 0) {
+        currentLine = word;
+      } else if (currentLine.length + 1 + word.length <= maxWidth) {
+        currentLine += " " + word;
+      } else {
+        lines.push(currentLine);
+        currentLine = word;
+      }
+    }
+
+    if (currentLine && lines.length < maxLines) {
+      lines.push(currentLine);
+    }
+
+    return lines;
   }
 
   render() {
@@ -431,7 +532,7 @@ export class StreamEncoderTUI {
       1 + logHeight + statusHeight,
       width - 1,
       errorHeight,
-      " ❌ Errors ",
+      " ⚠️ Issues ",
       "red"
     );
     this.updateErrorList(
